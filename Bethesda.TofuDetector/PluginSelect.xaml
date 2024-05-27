@@ -1,0 +1,31 @@
+﻿<Window x:Class="Bethesda.TofuDetector.PluginSelect"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Bethesda.TofuDetector"
+        mc:Ignorable="d"
+        Title="PluginSelect" Height="600" Width="400">
+
+	<Window.Resources>
+		<ContextMenu x:Key="ItemContextMenu">
+			<MenuItem Header="Enable All" Click="EnableAll_OnClick"/>
+			<MenuItem Header="Disable All" Click="DisableAll_OnClick"/>
+			<MenuItem Header="Invert" Click="InvertSelection_OnClick"/>
+		</ContextMenu>
+	</Window.Resources>
+
+	<DockPanel >
+	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" DockPanel.Dock="Bottom">
+		    <Button Content="OK" Width="75" Height="25" HorizontalAlignment="Right" Margin="5" Click="OKButton_Click"/>
+			<Button Content="Cancel" Width="75" Height="25" HorizontalAlignment="Right" Margin="5" Click="CancelButton_Click"/>
+	    </StackPanel>
+		<ListView Name="ListView" DockPanel.Dock="Top" ContextMenu="{StaticResource ItemContextMenu}">
+			<ListView.ItemTemplate>
+                <DataTemplate>
+	                <CheckBox IsChecked="{Binding WillLoad}" Content="{Binding PluginName}"></CheckBox>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
+    </DockPanel>
+</Window>
