@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bethesda.TofuDetector"
         mc:Ignorable="d"
-        Title="PluginSelect" Height="600" Width="400">
+        Title="Choose plugins to process..." Height="600" Width="400">
 
 	<Window.Resources>
 		<ContextMenu x:Key="ItemContextMenu">
@@ -20,12 +20,20 @@
 		    <Button Content="OK" Width="75" Height="25" HorizontalAlignment="Right" Margin="5" Click="OKButton_Click"/>
 			<Button Content="Cancel" Width="75" Height="25" HorizontalAlignment="Right" Margin="5" Click="CancelButton_Click"/>
 	    </StackPanel>
+		
 		<ListView Name="ListView" DockPanel.Dock="Top" ContextMenu="{StaticResource ItemContextMenu}">
 			<ListView.ItemTemplate>
                 <DataTemplate>
-	                <CheckBox IsChecked="{Binding WillLoad}" Content="{Binding PluginName}"></CheckBox>
-				</DataTemplate>
+	                <CheckBox DockPanel.Dock="Left" IsChecked="{Binding WillLoad}" Content="{Binding PluginName}"/>
+                </DataTemplate>
 			</ListView.ItemTemplate>
 		</ListView>
-    </DockPanel>
+		<!--DataGrid SelectionUnit="FullRow" Name="PluginDataGrid" GridLinesVisibility="None" DockPanel.Dock="Top" Height="Auto" AutoGenerateColumns="false" HeadersVisibility="Column" ContextMenu="{StaticResource ItemContextMenu}">
+			<DataGrid.Columns>
+				<DataGridCheckBoxColumn Header="Active" Binding="{Binding WillLoad}"/>
+				<DataGridTextColumn Header="Name" IsReadOnly="true" Binding="{Binding PluginName}"/>
+				<DataGridTextColumn Header="Priority" IsReadOnly="true" Binding="{Binding Priority}"/>
+			</DataGrid.Columns>
+		</DataGrid-->
+	</DockPanel>
 </Window>

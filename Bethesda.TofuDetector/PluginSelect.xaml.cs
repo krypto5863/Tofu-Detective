@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using DynamicData;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins.Order;
 
@@ -13,7 +14,8 @@ namespace Bethesda.TofuDetector
 		public PluginSelect(IEnumerable<ILoadOrderListingGetter> loadOrdersEnumerable)
 		{
 			InitializeComponent();
-			var pluginsToLoad = loadOrdersEnumerable.Select(loadOrderItem => new PluginLoad(loadOrderItem.FileName) { WillLoad = loadOrderItem.Enabled })
+			var pluginsToLoad = loadOrdersEnumerable
+				.Select(loadOrderItem => new PluginLoad(loadOrderItem.FileName, loadOrdersEnumerable.IndexOf(loadOrderItem)) { WillLoad = loadOrderItem.Enabled })
 				.ToList();
 
 			PluginLoads = new ObservableCollectionExtended<PluginLoad>(pluginsToLoad);

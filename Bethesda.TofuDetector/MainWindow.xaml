@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Tofu Detective" Height="450" Width="800">
 	<DockPanel>
 		<Menu DockPanel.Dock="Top">
 			<MenuItem Header="_File">
@@ -22,11 +22,11 @@
 			</StatusBarItem>
 		</StatusBar>
 		<TabControl>
-			<TabItem ToolTip="Improper characters, the details, and the replacements.">
+			<TabItem>
 				<TabItem.Header>
-					<Label Content="Tofu"></Label>
+					<Label Content="Tofu" ToolTip="Improper characters, the details, and the replacements."></Label>
 				</TabItem.Header>
-				<DataGrid Name="TofuDataGrid" AutoGenerateColumns="false" IsReadOnly="true" AlternatingRowBackground="Bisque" AlternationCount="1">
+				<DataGrid Name="TofuDataGrid" AutoGenerateColumns="false" IsReadOnly="true" AlternatingRowBackground="Bisque" AlternationCount="1" HeadersVisibility="Column">
 					<DataGrid.RowStyle>
 						<Style TargetType="DataGridRow">
 							<Setter Property="Height" Value="Auto"/>
@@ -57,14 +57,28 @@
 								</Style>
 							</DataGridTextColumn.ElementStyle>
 						</DataGridTextColumn>
-						<DataGridTextColumn Header = "Unsupported Characters" Binding = "{Binding UnsupportedCharacters}" Width="*"/>
-						<DataGridTextColumn Header = "Unsupported Characters (Unicode)" Binding = "{Binding UnsupportedCharactersUnicode}" Width="*"/>
+						<DataGridTextColumn Header = "Unsupported Characters" Binding = "{Binding UnsupportedCharacters}" Width="*">
+						<DataGridTextColumn.ElementStyle>
+							<Style>
+								<Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+								<Setter Property="TextBlock.TextAlignment" Value="Center"/>
+							</Style>
+						</DataGridTextColumn.ElementStyle>
+						</DataGridTextColumn>
+						<DataGridTextColumn Header = "Unsupported Characters (Unicode)" Binding = "{Binding UnsupportedCharactersUnicode}" Width="*">
+							<DataGridTextColumn.ElementStyle>
+								<Style>
+									<Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+									<Setter Property="TextBlock.TextAlignment" Value="Center"/>
+								</Style>
+							</DataGridTextColumn.ElementStyle>
+						</DataGridTextColumn>
 					</DataGrid.Columns>
 				</DataGrid>
 			</TabItem>
-			<TabItem ToolTip="Trailing and leading whitespace that was trimmed.">
+			<TabItem>
 				<TabItem.Header>
-					<Label Content="Whitespace"></Label>
+					<Label Content="Whitespace" ToolTip="Trailing and leading whitespace that was trimmed."></Label>
 				</TabItem.Header>
 				<DataGrid Name="WhitespaceDataGrid" AutoGenerateColumns="false" IsReadOnly="true" AlternatingRowBackground="Bisque" AlternationCount="1">
 					<DataGrid.RowStyle>

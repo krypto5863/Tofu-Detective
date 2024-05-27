@@ -39,7 +39,7 @@ namespace Bethesda.TofuDetector
 			var dialog = new SaveFileDialog()
 			{
 				DefaultDirectory = CurrentEnvironment.DataFolderPath,
-				FileName = CurrentPatchMod.ModKey.FileName,
+				FileName = "TofuFixPatch.esp",
 				Filter = "Skyrim Plugin(*.esp)|*.esp|All(*.*)|*",
 			};
 
@@ -55,7 +55,11 @@ namespace Bethesda.TofuDetector
 		}
 		private async void LoadLOItem_OnClick(object sender, RoutedEventArgs e)
 		{
-			CurrentEnvironment.Dispose();
+			if (CurrentEnvironment is not null)
+			{
+				CurrentEnvironment.Dispose();
+			}
+
 			await LoadOrderAndProcess();
 		}
 		private void Exit_OnClick(object sender, RoutedEventArgs e)
@@ -65,7 +69,7 @@ namespace Bethesda.TofuDetector
 
 		public async Task LoadOrderAndProcess()
 		{
-			CurrentPatchMod = new SkyrimMod(ModKey.FromFileName("TofuFixes.esp"), SkyrimRelease.SkyrimSE);
+			CurrentPatchMod = new SkyrimMod(ModKey.FromName(new Guid().ToString(), ModType.Plugin), SkyrimRelease.SkyrimSE);
 			CurrentEnvironment = GameEnvironment.Typical.Builder<ISkyrimMod, ISkyrimModGetter>(GameRelease.SkyrimSE)
 				.TransformLoadOrderListings(m =>
 				{
@@ -142,7 +146,7 @@ namespace Bethesda.TofuDetector
 			var trimmedSentences = new List<TrimmedSentence>();
 
 			#region Topics
-			status.Report("Scanning Topics...");
+			status.Report("Scanning Topic Forms...");
 
 			var winningTopics = env
 				.LoadOrder
@@ -154,7 +158,7 @@ namespace Bethesda.TofuDetector
 			for (var index = 0; index < winningTopics.Length; index++)
 			{
 				var topic = winningTopics[index];
-				var currentProgress = index * 100 / winningTopics.Length;
+				var currentProgress = (index + 1) * 100 / winningTopics.Length;
 				if (lastProgress != currentProgress)
 				{
 					progress.Report(currentProgress);
@@ -179,7 +183,7 @@ namespace Bethesda.TofuDetector
 			#endregion
 
 			#region Responses
-			status.Report("Scanning Dialogue...");
+			status.Report("Scanning Response Forms...");
 
 			var winningResponsesGetters = env
 				.LoadOrder
@@ -190,7 +194,7 @@ namespace Bethesda.TofuDetector
 
 			for (var i = 0; i < winningResponsesGetters.Length; i++)
 			{
-				var currentProgress = i * 100 / winningResponsesGetters.Length;
+				var currentProgress = (i+1) * 100 / winningResponsesGetters.Length;
 				if (lastProgress != currentProgress)
 				{
 					progress.Report(currentProgress);
@@ -237,7 +241,7 @@ namespace Bethesda.TofuDetector
 			#region NamedForms
 			
 			progress.Report(0);
-			status.Report("Scanning Named Items...");
+			status.Report("Scanning Named Forms...");
 
 			var winningGetters = env
 				.LoadOrder
@@ -248,7 +252,7 @@ namespace Bethesda.TofuDetector
 
 			for (var index = 0; index < winningGetters.Length; index++)
 			{
-				var currentProgress = index * 100 / winningGetters.Length;
+				var currentProgress = (index+1) * 100 / winningGetters.Length;
 				if (lastProgress != currentProgress)
 				{
 					progress.Report(currentProgress);
@@ -272,8 +276,8 @@ namespace Bethesda.TofuDetector
 					{
 						var patchedText = env.LinkCache
 							.ResolveContext<ISkyrimMajorRecord, ISkyrimMajorRecordGetter>(majorGetter.FormKey);
-						patchedText.GetOrAddAsOverride(CurrentPatchMod);
-						if (patchedText is INamed namedItem)
+						var overrideText = patchedText.GetOrAddAsOverride(CurrentPatchMod);
+						if (overrideText is INamed namedItem)
 						{
 							namedItem.Name = s;
 						}
