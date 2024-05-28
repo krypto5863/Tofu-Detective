@@ -2,7 +2,6 @@
 using Bethesda.TofuDetector.ViewModels;
 using Microsoft.Win32;
 using Mutagen.Bethesda;
-using System.Reflection;
 using System.Windows;
 
 namespace Bethesda.TofuDetector.Views
@@ -13,6 +12,7 @@ namespace Bethesda.TofuDetector.Views
 	public partial class MainWindow : Window
 	{
 		private readonly MainWindowViewModel _viewModel;
+
 		public MainWindow()
 		{
 			_viewModel = new MainWindowViewModel();

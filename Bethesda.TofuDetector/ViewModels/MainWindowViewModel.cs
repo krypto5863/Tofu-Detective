@@ -1,9 +1,10 @@
 ﻿using Bethesda.TofuDetector.Models;
 using Bethesda.TofuDetector.Services;
-using Bethesda.TofuDetector.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
+using JetBrains.Annotations;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
@@ -11,8 +12,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Input;
-using JetBrains.Annotations;
-using Mutagen.Bethesda.Plugins;
 
 namespace Bethesda.TofuDetector.ViewModels;
 
@@ -20,6 +19,7 @@ public partial class MainWindowViewModel : ObservableObject
 {
 	[UsedImplicitly]
 	public string Title { get; } = "Tofu Detective " + GetRunningVersion();
+
 	private static Version GetRunningVersion()
 	{
 		return Assembly.GetExecutingAssembly().GetName().Version ?? new Version();
