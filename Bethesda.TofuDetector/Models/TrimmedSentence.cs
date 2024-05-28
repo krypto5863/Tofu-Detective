@@ -1,4 +1,4 @@
-﻿namespace Bethesda.TofuDetector;
+﻿namespace Bethesda.TofuDetector.Models;
 
 public class TrimmedSentence : ISentence
 {
