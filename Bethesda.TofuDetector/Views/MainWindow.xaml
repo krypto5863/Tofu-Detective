@@ -10,7 +10,7 @@
 	<DockPanel>
 		<Menu Name="MenuBar" DockPanel.Dock="Top">
 			<MenuItem Header="_File">
-				<MenuItem Header="_Save Patch" Click="SaveFixItem_OnClick" />
+				<MenuItem Header="_Save Patch" IsEnabled="{Binding CanSavePatch}" Click="SaveFixItem_OnClick" />
 				<MenuItem Header="_Load Plugins" Click="LoadLOItem_OnClick" />
 				<MenuItem Header="_Exit" Click="Exit_OnClick" />
 			</MenuItem>

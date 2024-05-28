@@ -46,11 +46,11 @@ public partial class MainWindowViewModel : ObservableObject
 	{
 		_mutagenService = SkyrimMutagenService.GetOrCreateInstance(GameRelease.SkyrimSE);
 	}
+	public bool CanSavePatch() => _mutagenService.PatchMod is not null;
 
 	public async Task SavePatchPlugin(string path)
 	{
-		_mutagenService.SavePatch(path);
-		Status = $"Saved patch to: {path}";
+		Status = _mutagenService.SavePatch(path) == false ? "Error: Patch could not be saved!" : $"Saved patch to: {path}";
 		await Task.Delay(5000).ContinueWith(_ =>
 		{
 			Status = "Idle";
@@ -61,38 +61,30 @@ public partial class MainWindowViewModel : ObservableObject
 	{
 		_mutagenService.Load(modKeys);
 
-		try
+		IProgress<double> progress = new Progress<double>(percent =>
 		{
-			Mouse.OverrideCursor = Cursors.Wait;
-			IProgress<double> progress = new Progress<double>(percent =>
-			{
-				Debug.WriteLine(percent);
-				Progress = percent;
-			});
-			IProgress<string> stringProgress = new Progress<string>(status =>
-			{
-				Debug.WriteLine(status);
-				Status = status;
-			});
-
-			var taskResults = await Task.Run(() =>
-			{
-				if (_mutagenService.SkyrimEnvironment is { } skyrimGameEnvironment)
-				{
-					Debug.Assert(_mutagenService.PatchMod != null, "_mutagenService.PatchMod != null");
-					return LoadTofuSentences(skyrimGameEnvironment, _mutagenService.PatchMod, progress, stringProgress);
-				}
-				return (Enumerable.Empty<TofuSentence>(), Enumerable.Empty<TrimmedSentence>());
-			});
-			TofuSentences = new ObservableCollection<TofuSentence>(taskResults.Item1);
-			WhiteSpaceSentences = new ObservableCollection<TrimmedSentence>(taskResults.Item2);
-
-			Metrics = $"Whitespace: {WhiteSpaceSentences.Count} | Tofu: {TofuSentences.Count}";
-		}
-		finally
+			Debug.WriteLine(percent);
+			Progress = percent;
+		});
+		IProgress<string> stringProgress = new Progress<string>(status =>
 		{
-			Mouse.OverrideCursor = null;
-		}
+			Debug.WriteLine(status);
+			Status = status;
+		});
+
+		var taskResults = await Task.Run(() =>
+		{
+			if (_mutagenService.SkyrimEnvironment is { } skyrimGameEnvironment)
+			{
+				Debug.Assert(_mutagenService.PatchMod != null, "_mutagenService.PatchMod != null");
+				return LoadTofuSentences(skyrimGameEnvironment, _mutagenService.PatchMod, progress, stringProgress);
+			}
+			return (Enumerable.Empty<TofuSentence>(), Enumerable.Empty<TrimmedSentence>());
+		});
+		TofuSentences = new ObservableCollection<TofuSentence>(taskResults.Item1);
+		WhiteSpaceSentences = new ObservableCollection<TrimmedSentence>(taskResults.Item2);
+
+		Metrics = $"Whitespace: {WhiteSpaceSentences.Count} | Tofu: {TofuSentences.Count}";
 	}
 
 	private static void ProcessRecord(string textToScan, string formId, string editorId, string pluginFile, ICollection<TrimmedSentence> trimmedSentences, ICollection<TofuSentence> tofuSentences, Action<string> overrideAction)

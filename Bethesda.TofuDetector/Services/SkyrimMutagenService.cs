@@ -42,12 +42,19 @@ public class SkyrimMutagenService : ISkyrimMutagenService
 			.Build();
 	}
 
-	public void SavePatch(string path)
+	public bool SavePatch(string path)
 	{
-		PatchMod?.WriteToBinary(path, new BinaryWriteParameters()
+		if (PatchMod is null)
+		{
+			return false;
+		}
+
+		PatchMod.WriteToBinary(path, new BinaryWriteParameters()
 		{
 			ModKey = ModKeyOption.NoCheck
 		});
+
+		return true;
 	}
 
 	~SkyrimMutagenService()

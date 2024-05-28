@@ -3,6 +3,7 @@ using Bethesda.TofuDetector.ViewModels;
 using Microsoft.Win32;
 using Mutagen.Bethesda;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Bethesda.TofuDetector.Views
 {
@@ -24,6 +25,11 @@ namespace Bethesda.TofuDetector.Views
 
 		private async void SaveFixItem_OnClick(object sender, RoutedEventArgs e)
 		{
+			if (_viewModel.CanSavePatch() == false)
+			{
+				return;
+			}
+
 			var saveDialog = new SaveFileDialog()
 			{
 				Filter = "Plugin File | *.esp",
@@ -41,18 +47,26 @@ namespace Bethesda.TofuDetector.Views
 
 		private async void LoadLOItem_OnClick(object sender, RoutedEventArgs e)
 		{
-			MenuBar.IsEnabled = false;
-			var pluginDialogue = new PluginSelect
+			try
 			{
-				Owner = this
-			};
-			var dialogueResult = pluginDialogue.ShowDialog();
-			if (dialogueResult is null or false)
-			{
-				return;
+				MenuBar.IsEnabled = false;
+				var pluginDialogue = new PluginSelect
+				{
+					Owner = this
+				};
+				var dialogueResult = pluginDialogue.ShowDialog();
+				if (dialogueResult is null or false)
+				{
+					return;
+				}
+				Mouse.OverrideCursor = Cursors.Wait;
+				await _viewModel.LoadOrderAndProcess(pluginDialogue.Result.Keys.ToArray());
 			}
-			await _viewModel.LoadOrderAndProcess(pluginDialogue.Result.Keys.ToArray());
-			MenuBar.IsEnabled = true;
+			finally
+			{
+				Mouse.OverrideCursor = null;
+				MenuBar.IsEnabled = true;
+			}
 		}
 
 		private void Exit_OnClick(object sender, RoutedEventArgs e)

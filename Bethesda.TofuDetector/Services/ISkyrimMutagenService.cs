@@ -11,5 +11,5 @@ public interface ISkyrimMutagenService
 
 	public void Load(ModKey[] loadOrder);
 
-	public void SavePatch(string path);
+	public bool SavePatch(string path);
 }
