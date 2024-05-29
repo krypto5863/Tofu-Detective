@@ -9,8 +9,8 @@
     <ApplicationIcon>Tofu.ico</ApplicationIcon>
     <AssemblyName>Tofu Detective</AssemblyName>
     <Title>Tofu Detective</Title>
-    <FileVersion>1.0.1</FileVersion>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <FileVersion>1.0.2</FileVersion>
+    <AssemblyVersion>1.0.2</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
