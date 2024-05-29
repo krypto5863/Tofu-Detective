@@ -120,10 +120,13 @@ public partial class MainWindowViewModel : ObservableObject
 
 	private static (IEnumerable<TofuSentence>, IEnumerable<TrimmedSentence>) LoadTofuSentences(IGameEnvironment<ISkyrimMod, ISkyrimModGetter> environment, ISkyrimMod currentPatchMod, IProgress<double> progress, IProgress<string> status)
 	{
+		var sw = Stopwatch.StartNew();
+
 		var lastProgress = 0;
 		var tofuSentences = new List<TofuSentence>();
 		var trimmedSentences = new List<TrimmedSentence>();
 
+		/*
 		#region Topics
 
 		status.Report("Scanning Topic Forms...");
@@ -219,18 +222,21 @@ public partial class MainWindowViewModel : ObservableObject
 		}
 
 		#endregion Responses
+		*/
 
 		#region NamedForms
 
 		progress.Report(0);
-		status.Report("Scanning Named Forms...");
+		status.Report("Loading Forms...");
 
 		var winningGetters = environment
 			.LoadOrder
 			.PriorityOrder
 			.WinningOverrides<ISkyrimMajorRecordGetter>()
-			.Where(m => m is INamedGetter and not IDialogTopicGetter and not IDialogResponseGetter)
+			.Where(m => m is INamedGetter or IDialogResponsesGetter)
 			.ToArray();
+
+		status.Report("Scanning Forms...");
 
 		for (var index = 0; index < winningGetters.Length; index++)
 		{
@@ -242,37 +248,93 @@ public partial class MainWindowViewModel : ObservableObject
 			}
 
 			var majorGetter = winningGetters[index];
-
-			if (majorGetter is not INamedGetter namedGetter || namedGetter.Name.IsNullOrWhitespace())
+			if (majorGetter is INamedGetter namedGetter && namedGetter.Name.IsNullOrWhitespace() == false)
 			{
-				continue;
+				ProcessRecord(namedGetter.Name,
+					majorGetter.FormKey.IDString(),
+					majorGetter.EditorID ?? string.Empty,
+					majorGetter.FormKey.ModKey.FileName,
+					trimmedSentences,
+					tofuSentences,
+					s =>
+					{
+						var patchedText = environment.LinkCache
+							.ResolveContext<ISkyrimMajorRecord, ISkyrimMajorRecordGetter>(majorGetter.FormKey);
+						var overrideText = patchedText.GetOrAddAsOverride(currentPatchMod);
+						if (overrideText is INamed namedItem)
+						{
+							namedItem.Name = s;
+						}
+						else
+						{
+							Debug.Fail("An overriden record could not be edited afterwards!");
+						}
+					});
 			}
 
-			ProcessRecord(namedGetter.Name,
-				majorGetter.FormKey.IDString(),
-				majorGetter.EditorID ?? string.Empty,
-				majorGetter.FormKey.ModKey.FileName,
-				trimmedSentences,
-				tofuSentences,
-				s =>
+			if (majorGetter is IDialogResponsesGetter dialogResponses)
+			{
+				if (dialogResponses.Prompt?.String != null &&
+				    dialogResponses.Prompt.String.IsNullOrWhitespace() == false)
 				{
-					var patchedText = environment.LinkCache
-						.ResolveContext<ISkyrimMajorRecord, ISkyrimMajorRecordGetter>(majorGetter.FormKey);
-					var overrideText = patchedText.GetOrAddAsOverride(currentPatchMod);
-					if (overrideText is INamed namedItem)
+					ProcessRecord(dialogResponses.Prompt.String,
+						dialogResponses.FormKey.IDString(),
+						dialogResponses.EditorID ?? string.Empty,
+						dialogResponses.FormKey.ModKey.FileName,
+						trimmedSentences,
+						tofuSentences,
+						s =>
+						{
+							var patchedText = environment.LinkCache
+								.ResolveContext<ISkyrimMajorRecord, ISkyrimMajorRecordGetter>(dialogResponses.FormKey);
+							var newMajorRecord = patchedText.GetOrAddAsOverride(currentPatchMod);
+							if (newMajorRecord is IDialogResponses overrideDialogResponses)
+							{
+								overrideDialogResponses.Prompt = s;
+							}
+							else
+							{
+								Debug.Fail("An overriden record could not be edited afterwards!");
+							}
+						});
+				}
+
+				for (var index1 = 0; index1 < dialogResponses.Responses.Count; index1++)
+				{
+					var response = dialogResponses.Responses[index1];
+					if (response.Text.String == null || response.Text.String.IsNullOrWhitespace())
 					{
-						namedItem.Name = s;
+						continue;
 					}
-					else
-					{
-						Debug.Fail("An overriden record could not be edited afterwards!");
-					}
-				});
+
+					var localIndex = index1;
+					ProcessRecord(response.Text.String,
+						dialogResponses.FormKey.IDString(),
+						dialogResponses.EditorID ?? string.Empty,
+						dialogResponses.FormKey.ModKey.FileName,
+						trimmedSentences,
+						tofuSentences,
+						s =>
+						{
+							var patchedText = environment.LinkCache
+								.ResolveContext<ISkyrimMajorRecord, ISkyrimMajorRecordGetter>(dialogResponses.FormKey);
+							var newMajorRecord = patchedText.GetOrAddAsOverride(currentPatchMod);
+							if (newMajorRecord is IDialogResponses overrideDialogResponses)
+							{
+								overrideDialogResponses.Responses[localIndex].Text = s;
+							}
+							else
+							{
+								Debug.Fail("An overriden record could not be edited afterwards!");
+							}
+						});
+				}
+			}
 		}
 
 		#endregion NamedForms
 
-		status.Report("Done!");
+		status.Report($"Done! {sw.Elapsed}");
 
 		return (tofuSentences, trimmedSentences);
 	}
